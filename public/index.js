@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const searchEngineSelect = document.getElementById("searchEngineSelect");
   const goButton = document.querySelector('button[data-for="search"]');
   const countdownEl = document.getElementById("restart-countdown");
+  const TimerHideSelect = document.getElementById("Timer-Hide-Select");
 
   function isPhone() {
     const screenWidth = window.innerWidth;
@@ -29,6 +30,63 @@ document.addEventListener("DOMContentLoaded", function () {
       padding: 1rem;
     `;
     return;
+  }
+
+  // Timer Hide Select functionality
+  if (TimerHideSelect) {
+      // Function to set the redirect cookie
+      function setRedirectCookie(hours) {
+          const expirationHours = parseFloat(hours);
+          const expirationDate = new Date();
+          expirationDate.setTime(expirationDate.getTime() + (expirationHours * 60 * 60 * 1000));
+
+          document.cookie = `hidePageRedirect=true; expires=${expirationDate.toUTCString()}; path=/`;
+          console.log(`Set redirect cookie to expire in ${hours} hours`);
+      }
+
+      // Function to check for redirect cookie
+      function checkRedirectCookie() {
+          const cookies = document.cookie.split(';');
+          for (const cookie of cookies) {
+              const [name, value] = cookie.trim().split('=');
+              if (name === 'hidePageRedirect' && value === 'true') {
+                  return true;
+              }
+          }
+          return false;
+      }
+
+      // Check for cookie on page load
+      if (checkRedirectCookie()) {
+          console.log('Redirect cookie found - going back in history');
+          window.history.back();
+          return; // Stop execution of remaining code
+      }
+
+      // Load saved preference
+      const savedTimerHidePreference = localStorage.getItem('timerHidePreference');
+      if (savedTimerHidePreference && 
+          [...TimerHideSelect.options].some(opt => opt.value === savedTimerHidePreference)) {
+          TimerHideSelect.value = savedTimerHidePreference;
+      }
+
+      // Save preference when changed and set cookie (except for 0 value)
+      TimerHideSelect.addEventListener('change', function() {
+          const selectedValue = this.value;
+          localStorage.setItem('timerHidePreference', selectedValue);
+
+          if (selectedValue !== '0') {
+              setRedirectCookie(selectedValue);
+              // Optional: Show confirmation message
+              alert(`Page access will be restricted for ${selectedValue} hours`);
+          }
+      });
+
+      // Optional: Add a way to clear the cookie if needed
+      window.clearHidePageCookie = function() {
+          document.cookie = 'hidePageRedirect=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          alert('Page restriction removed. You can now access this page normally.');
+      }
   }
 
   if (searchBar) {
