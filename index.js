@@ -5,7 +5,7 @@ import os from "os";
 import si from "systeminformation";
 import fs from "fs";
 const [app, listen] = new ChemicalServer();
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 8080;
 const restartInterval = 3600000;
 const serverStartTime = Date.now();
 app.use(bodyParser.json());
